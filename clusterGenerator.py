@@ -8,11 +8,11 @@ edges between them"
 import sys
 import os
 import fnmatch
+import random
 
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
-print 'Folder =', str(sys.argv[1])
-PATH = sys.argv[1]
+#print 'Number of arguments:', len(sys.argv), 'arguments.'
+#print 'Argument List:', str(sys.argv)
+#print 'Folder =', str(sys.argv[1])
 
 # Make the job list
 
@@ -69,3 +69,54 @@ gexf_file = get_gexf_header() + nodes + edges + get_gexf_footer()
 
 save_to_file("output.gexf", gexf_file)
 
+#MAIN ======================================================================================
+folderPath = sys.argv[1]
+defaultSize = 10
+defaultR = 153
+defaultG = 153
+defaultB = 153
+minX = -500
+maxX = 500
+minY = -500
+maxY = 500
+minZ = -10
+maxZ = 10
+edgeCreationProbability = 0.0013
+edgeDefaultProximity = 1
+
+# Generate all nodes
+node_list = []
+id = 0
+for job in make_job_list(folderPath):
+	node_list.append(get_gexf_node(id, job, 10, random.uniform(minX, maxX), random.uniform(minY, maxY), random.uniform(minZ, maxZ),\
+		defaultR, defaultG, defaultB))
+	id += 1
+
+
+# Generate all edges
+edge_list = []
+id = 0
+for nodeId1 in range(0, len(node_list)):
+	for nodeId2 in range(0, len(node_list)):
+		if(random.uniform(0, 1) < edgeCreationProbability):
+			edge_list.append(get_gexf_edge(id, nodeId1, nodeId2, edgeDefaultProximity))
+			id+=1
+
+
+# Generate the gexf
+gexf_file = get_gexf_header()
+
+gexf_file += "<nodes>"
+for node in node_list:
+	gexf_file += node
+gexf_file += "</nodes>"
+
+gexf_file += "<edges>"
+for edge in edge_list:
+	gexf_file += edge
+gexf_file += "</edges>"
+
+gexf_file += get_gexf_footer()
+
+# Export result
+save_to_file("part1.gexf", gexf_file)
