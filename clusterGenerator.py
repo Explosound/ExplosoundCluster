@@ -152,9 +152,17 @@ def get_features(job_list, force_rescan):
 
 	return filtered_features
 
+def proximity_score(featureSet1, featureSet2):
+	print "proximityScore random TODO"
+	return random.uniform(0.5, 1) 
+
 def get_similarity(features):
-	# TODO generate similarity matrix
 	similarity = []
+
+	for id1 in range(0,len(features)):
+		for id2 in range(id1,len(features) - 1):
+			similarity.append(proximity_score(features[id1], features[id2]))
+
 	return similarity
 
 
