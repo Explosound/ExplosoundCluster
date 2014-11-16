@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import fnmatch
 import pickle as pkl
+from sklearn import preprocessing as ppr
 
 
 #print 'Number of arguments:', len(sys.argv), 'arguments.'
@@ -120,26 +121,35 @@ def get_features(job_list, force_rescan):
 			flatness.append(float(audiofile_features[i][2]))
 
 		#serialisation avec pickle 
-		with open('./rms.pkl', 'wb') as f:
+		with open('/Users/neogaldr/cluster/rms.pkl', 'wb') as f:
 			pkl.dump(rms,f)
-		with open('./centroid.pkl', 'wb') as f:
+		with open('/Users/neogaldr/cluster/centroid.pkl', 'wb') as f:
 			pkl.dump(centroid,f)
-		with open('./flatness.pkl', 'wb') as f:
+		with open('/Users/neogaldr/cluster/flatness.pkl', 'wb') as f:
 			pkl.dump(flatness,f)
-		with open('./features.pkl', 'wb') as f:
+		with open('/Users/neogaldr/cluster/features.pkl', 'wb') as f:
 			pkl.dump(audiofile_features,f)			
 
 	#ouvrir un serialized
-	with open('./rms.pkl', 'rb') as f:
+	with open('/Users/neogaldr/Developments/Explosound/Cluster/rms.pkl', 'rb') as f:
 		rms = pkl.load(f)
-	with open('./centroid.pkl', 'rb') as f:
+	with open('/Users/neogaldr/Developments/Explosound/Cluster/centroid.pkl', 'rb') as f:
 		centroid = pkl.load(f)
-	with open('./flatness.pkl', 'rb') as f:
+	with open('/Users/neogaldr/Developments/Explosound/Cluster/flatness.pkl', 'rb') as f:
 		flatness = pkl.load(f)
-	with open('./features.pkl', 'rb') as f:
+	with open('/Users/neogaldr/Developments/Explosound/Cluster/features.pkl', 'rb') as f:
 		features = pkl.load(f)
 
-	filtered_features = features #TODO
+	#centrer et reduire
+	ppr.scale(rms)
+	ppr.scale(centroid)
+	ppr.scale(flatness)
+
+	filtered_features = []
+
+	for i in range(len(rms)):
+		filtered_features.append([job_list[i], rms[i], centroid[i], flatness[i]])
+
 	return filtered_features
 
 def get_similarity(features):
@@ -163,12 +173,16 @@ minZ = -10
 maxZ = 10
 edgeCreationProbability = 0.0013
 edgeDefaultProximity = 1
+forceRescan = False
 
 print "Hello =)"
 print "Generating job list for folder " + folderPath
 job_list = make_job_list(folderPath)
 print "Generating similarity matrix"
-features = get_features(job_list)
+features = get_features(job_list, forceRescan)
+
+print features
+
 similarity = get_similarity(features)
 
 print "____________________________"
