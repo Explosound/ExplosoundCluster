@@ -17,6 +17,7 @@ import numpy as np
 import fnmatch
 import pickle as pkl
 
+
 #print 'Number of arguments:', len(sys.argv), 'arguments.'
 #print 'Argument List:', str(sys.argv)
 #print 'Folder =', str(sys.argv[1])
@@ -135,18 +136,15 @@ def get_features(job_list, force_rescan):
 		centroid = pkl.load(f)
 	with open('./flatness.pkl', 'rb') as f:
 		flatness = pkl.load(f)
-
-	#TODO FILTER
-
 	with open('./features.pkl', 'rb') as f:
 		features = pkl.load(f)
-	return features
 
-def get_similarity(job_list):
-	features = (get_features(job_list, True))
-	print "Features = " + str(features)
+	filtered_features = features #TODO
+	return filtered_features
 
+def get_similarity(features):
 	# TODO generate similarity matrix
+	return 0
 
 
 
@@ -170,7 +168,8 @@ print "Hello =)"
 print "Generating job list for folder " + folderPath
 job_list = make_job_list(folderPath)
 print "Generating similarity matrix"
-get_similarity(job_list)
+features = get_features(job_list)
+similarity = get_similarity(features)
 
 print "____________________________"
 print "Generating the resulting graph"
