@@ -153,17 +153,33 @@ def get_features(job_list, force_rescan):
 	return filtered_features
 
 def proximity_score(featureSet1, featureSet2):
-	print "proximityScore random TODO"
 	return random.uniform(0.5, 1) 
 
-def get_similarity(features):
-	similarity = []
+def get_edges(features):
+	similarity = [[0 for x in range(len(features))] for x in range(len(features))] 
 
 	for id1 in range(0,len(features)):
-		for id2 in range(id1,len(features) - 1):
-			similarity.append(proximity_score(features[id1], features[id2]))
+		for id2 in range(id1 + 1,len(features)):
+			similarity[id1][id2] = proximity_score(features[id1], features[id2])
+		
+	#similarity = sorted(similarity, key=lambda x: -x[2]) #sort by proximity score
+	
+	edges = []
+	for nodeId in range(0, len(features)):
+		#create a list of all potential connections for this node
+		potential_edges = []
+		for id1 in range(0, nodeId):
+			if(similarity[id1][nodeId] > 0):
+				potential_edges.append([id1, nodeId, similarity[id1][nodeId]])
+		for id2 in range(nodeId + 1,len(features)):
+			if(similarity[nodeId][id2] > 0):
+				potential_edges.append([nodeId, id2, similarity[nodeId][id2]])
 
-	return similarity
+		edges.append(max(potential_edges, key=lambda x:x[2])) #max by proximity score
+		# nullify scores so it doesn't get picked twice
+		similarity[edges[-1][0]][edges[-1][1]] = 0
+
+	return edges
 
 
 
@@ -190,7 +206,7 @@ job_list = make_job_list(folderPath)
 print "Generating similarity matrix"
 features = get_features(job_list, forceRescan)
 
-similarity = get_similarity(features)
+edges = get_edges(features)
 
 print "____________________________"
 print "Generating the resulting graph"
@@ -207,10 +223,9 @@ print ">edges"
 # Generate all edges
 edge_list = []
 id = 0
-for edge in similarity:
-	#TODO
-	print "TODO: make edge edge_list.append(get_gexf_edge(id, nodeId1, nodeId2, edgeDefaultProximity))\
-			id+=1"
+for edge in edges:
+	edge_list.append(get_gexf_edge(id, edge[0], edge[1], edge[2]));
+	id+=1
 
 print ">gexf header and footer"
 # Generate the gexf
