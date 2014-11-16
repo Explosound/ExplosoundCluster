@@ -154,7 +154,8 @@ def get_features(job_list, force_rescan):
 
 def get_similarity(features):
 	# TODO generate similarity matrix
-	return 0
+	similarity = []
+	return similarity
 
 
 
@@ -181,8 +182,6 @@ job_list = make_job_list(folderPath)
 print "Generating similarity matrix"
 features = get_features(job_list, forceRescan)
 
-print features
-
 similarity = get_similarity(features)
 
 print "____________________________"
@@ -191,8 +190,8 @@ print ">nodes"
 # Generate all nodes
 node_list = []
 id = 0
-for job in make_job_list(folderPath):
-	node_list.append(get_gexf_node(id, job, 10, random.uniform(minX, maxX), random.uniform(minY, maxY), random.uniform(minZ, maxZ),\
+for feature in features:
+	node_list.append(get_gexf_node(id, feature[0], 10, feature[2], feature[3], feature[1],\
 		defaultR, defaultG, defaultB))
 	id += 1
 
@@ -200,11 +199,10 @@ print ">edges"
 # Generate all edges
 edge_list = []
 id = 0
-for nodeId1 in range(0, len(node_list)):
-	for nodeId2 in range(0, len(node_list)):
-		if(random.uniform(0, 1) < edgeCreationProbability):
-			edge_list.append(get_gexf_edge(id, nodeId1, nodeId2, edgeDefaultProximity))
-			id+=1
+for edge in similarity:
+	#TODO
+	print "TODO: make edge edge_list.append(get_gexf_edge(id, nodeId1, nodeId2, edgeDefaultProximity))\
+			id+=1"
 
 print ">gexf header and footer"
 # Generate the gexf
