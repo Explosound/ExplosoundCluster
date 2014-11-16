@@ -49,7 +49,7 @@ def get_gexf_header():
 	      <attribute id=\"modularity_class\" title=\"Modularity Class\" type=\"integer\"></attribute>\
 	    </attributes>"
 
-def get_gexf_footer():
+def get_gexf_footer():	
 	return "  </graph>\
 </gexf>"
 
@@ -59,7 +59,7 @@ def get_gexf_node(id, filePath, size, x, y, z, r, g, b):
           <attvalue for=\"modularity_class\" value=\"0\"></attvalue>\
         </attvalues>\
         <viz:size value=\"" +str(size)+ "\"></viz:size>\
-        <viz:position x=\""+str(x)+"\" y=\""+str(y)+"\" z=\""+str(z)+"\"></viz:position>\
+        <viz:position x=\""+str(x*100)+"\" y=\""+str(y)+"\" z=\""+str(z)+"\"></viz:position>\
         <viz:color r=\""+str(r)+"\" g=\""+str(g)+"\" b=\""+str(b)+"\"></viz:color>\
       </node>"
 
@@ -141,9 +141,16 @@ def get_features(job_list, force_rescan):
 		features = pkl.load(f)
 
 	#centrer et reduire
-	rms = ppr.scale(rms)*100
-	centroid = ppr.scale(centroid)*100
-	flatness = ppr.scale(flatness)*100
+	rms = ppr.scale(rms)
+	centroid = np.log(centroid)
+	m = max(centroid)
+	n = min(centroid)
+	centroid = [(c-n)/(m-n) for c in centroid]
+
+	flatness = ppr.scale(flatness)
+	m = max(flatness)
+	n = min(flatness)
+	flatness = [(c-n)/(m-n) for c in flatness]
 
 	filtered_features = []
 
@@ -152,8 +159,11 @@ def get_features(job_list, force_rescan):
 
 	return filtered_features
 
-def proximity_score(featureSet1, featureSet2):
-	return random.uniform(0.5, 1) 
+def proximity_score(fs1, fs2):
+	return np.sqrt((fs1[2]-fs2[2])**2+(fs1[3]-fs2[3])**2)
+	
+	# np.linalg.norm(point2 - point1)
+	# random.uniform(0.5, 1)
 
 def get_edges(features):
 	similarity = [[0 for x in range(len(features))] for x in range(len(features))] 
@@ -178,6 +188,8 @@ def get_edges(features):
 		edges.append(max(potential_edges, key=lambda x:x[2])) #max by proximity score
 		# nullify scores so it doesn't get picked twice
 		similarity[edges[-1][0]][edges[-1][1]] = 0
+
+		
 
 	return edges
 
