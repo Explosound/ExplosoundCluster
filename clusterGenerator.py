@@ -7,10 +7,15 @@ edges between them"
 
 import sys
 import os
+from os import listdir
+from os.path import isfile, join
 import fnmatch
 import random
-import pymir
+from pymir import AudioFile
 import matplotlib.pyplot as plt
+import numpy as np
+import fnmatch
+import pickle as pkl
 
 #print 'Number of arguments:', len(sys.argv), 'arguments.'
 #print 'Argument List:', str(sys.argv)
@@ -64,73 +69,87 @@ def save_to_file(filePath, gexfToSave):
 	text_file.write(gexfToSave)
 	text_file.close()
 
-def get_features(job_list):
-	print "get_features running on " + str(len(job_list)) + " files."
-	print job_list[0]
-	ret = []
-	analyzed = 0
-	for i in range(len(job_list)) :
-		try:
+def get_features(job_list, force_rescan):
+	print "get_features"
+	if(force_rescan == True):
+		print ">force_rescan on " + str(len(job_list)) + " jobs"
+		analysed = 0
+		audiofile_features = {}
+		for i in range(len(job_list)):
+			try:
+				print "> " + str(i) + " / " + str(len(job_list)),
+				audiofile = AudioFile.open(job_list[i])
+				print ",s",
+				spectrum = audiofile.spectrum()				
+				rms = audiofile.rms()
+				print ",rms",
+				centroid = spectrum.centroid
+				print ",centroid",
+				flatness = -1
+				try:
+					flatness = str(spectrum.flatness())
+					pass
+				except:
+					pass
+				finally:
+					pass
 
-			if i%10 == 0 :
-				print ">" + i + "/" + str(len(job_list))
-			i+=1
+				print ",flatness",				
+				features = [rms, centroid, flatness]
+				print ",done!"
+				audiofile_features[job_list[i]] = features
+				analysed = analysed + 1
+			except:
+				#print "Exception: " + job_list[i]
+				pass
+			else:
+				pass
+			finally:
+				pass	
 
-			audiofile = pymir.AudioFile.open(fullFilePath)
-			spectrum = audiofile.spectrum()
-			entry = [fullFilePath, audiofile.rms(), spectrum.centroid(), str(spectrum.flatness())]
-			ret.append(entry)
-			analyzed += 1
-		except:
-			pass
-		else:
-			pass
-		finally:
-			pass
-	print "Feature extraction : " + str(analyzed) + "/" + str(i)
-	return ret
+		print "<force_rescan " + str(analysed) + "/" + str(len(job_list)) + " scanned."
 
-def filter_features(features):
-	ret = []
+		rms = []
+		centroid = []
+		flatness = []
 
-	# DEBUG
-	rms = []
-	centroid = []
-	flatness = []
-	for feature in features:
-		rms.append(feature[1])
-		centroid.append(feature[2])
-		flatness.append(feature[3])
+		for i in audiofile_features.keys():
+			rms.append(audiofile_features[i][0])
+			centroid.append(audiofile_features[i][1])
+			flatness.append(float(audiofile_features[i][2]))
 
-	plt.hist(rms)
-	plt.show()
-	
-	plt.hist(centroid)
-	plt.show()
+		#serialisation avec pickle 
+		with open('./rms.pkl', 'wb') as f:
+			pkl.dump(rms,f)
+		with open('./centroid.pkl', 'wb') as f:
+			pkl.dump(centroid,f)
+		with open('./flatness.pkl', 'wb') as f:
+			pkl.dump(flatness,f)
+		with open('./features.pkl', 'wb') as f:
+			pkl.dump(audiofile_features,f)			
 
-	plt.hist(flatness)
-	plt.show()
+	#ouvrir un serialized
+	with open('./rms.pkl', 'rb') as f:
+		rms = pkl.load(f)
+	with open('./centroid.pkl', 'rb') as f:
+		centroid = pkl.load(f)
+	with open('./flatness.pkl', 'rb') as f:
+		flatness = pkl.load(f)
 
-	# TODO filter
+	#TODO FILTER
 
-	return ret
-
+	with open('./features.pkl', 'rb') as f:
+		features = pkl.load(f)
+	return features
 
 def get_similarity(job_list):
-	filtered_features = filter_features(get_features(job_list))
-	print filtered_features
+	features = (get_features(job_list, True))
+	print "Features = " + str(features)
 
 	# TODO generate similarity matrix
 
 
 
-
-nodes = "<nodes>" + get_gexf_node(0, "/test/file", 30, 0,0,0, 90, 90, 255) + get_gexf_node(1, "/toto/file", 30, -50,0,0, 200,90,90) + "</nodes>"
-edges = "<edges>" + get_gexf_edge(0, 0, 1, 1) + "</edges>"
-
-gexf_file = get_gexf_header() + nodes + edges + get_gexf_footer()
-
-save_to_file("output.gexf", gexf_file)
 
 #MAIN ======================================================================================
 folderPath = sys.argv[1]
@@ -147,8 +166,15 @@ maxZ = 10
 edgeCreationProbability = 0.0013
 edgeDefaultProximity = 1
 
-get_similarity(make_job_list(folderPath))
+print "Hello =)"
+print "Generating job list for folder " + folderPath
+job_list = make_job_list(folderPath)
+print "Generating similarity matrix"
+get_similarity(job_list)
 
+print "____________________________"
+print "Generating the resulting graph"
+print ">nodes"
 # Generate all nodes
 node_list = []
 id = 0
@@ -157,7 +183,7 @@ for job in make_job_list(folderPath):
 		defaultR, defaultG, defaultB))
 	id += 1
 
-
+print ">edges"
 # Generate all edges
 edge_list = []
 id = 0
@@ -167,7 +193,7 @@ for nodeId1 in range(0, len(node_list)):
 			edge_list.append(get_gexf_edge(id, nodeId1, nodeId2, edgeDefaultProximity))
 			id+=1
 
-
+print ">gexf header and footer"
 # Generate the gexf
 gexf_file = get_gexf_header()
 
@@ -184,4 +210,7 @@ gexf_file += "</edges>"
 gexf_file += get_gexf_footer()
 
 # Export result
+print "Saving generated gexf to ./part1.gexf"
 save_to_file("part1.gexf", gexf_file)
+
+print "Good bye !"
