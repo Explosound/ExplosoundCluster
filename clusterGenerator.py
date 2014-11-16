@@ -141,9 +141,9 @@ def get_features(job_list, force_rescan):
 		features = pkl.load(f)
 
 	#centrer et reduire
-	ppr.scale(rms)
-	ppr.scale(centroid)
-	ppr.scale(flatness)
+	rms = ppr.scale(rms)*100
+	centroid = ppr.scale(centroid)*100
+	flatness = ppr.scale(flatness)*100
 
 	filtered_features = []
 
