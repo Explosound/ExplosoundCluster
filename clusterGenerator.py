@@ -9,6 +9,8 @@ import sys
 import os
 import fnmatch
 import random
+import pymir
+import matplotlib.pyplot as plt
 
 #print 'Number of arguments:', len(sys.argv), 'arguments.'
 #print 'Argument List:', str(sys.argv)
@@ -62,6 +64,67 @@ def save_to_file(filePath, gexfToSave):
 	text_file.write(gexfToSave)
 	text_file.close()
 
+def get_features(job_list):
+	print "get_features running on " + str(len(job_list)) + " files."
+	print job_list[0]
+	ret = []
+	analyzed = 0
+	for i in range(len(job_list)) :
+		try:
+
+			if i%10 == 0 :
+				print ">" + i + "/" + str(len(job_list))
+			i+=1
+
+			audiofile = pymir.AudioFile.open(fullFilePath)
+			spectrum = audiofile.spectrum()
+			entry = [fullFilePath, audiofile.rms(), spectrum.centroid(), str(spectrum.flatness())]
+			ret.append(entry)
+			analyzed += 1
+		except:
+			pass
+		else:
+			pass
+		finally:
+			pass
+	print "Feature extraction : " + str(analyzed) + "/" + str(i)
+	return ret
+
+def filter_features(features):
+	ret = []
+
+	# DEBUG
+	rms = []
+	centroid = []
+	flatness = []
+	for feature in features:
+		rms.append(feature[1])
+		centroid.append(feature[2])
+		flatness.append(feature[3])
+
+	plt.hist(rms)
+	plt.show()
+	
+	plt.hist(centroid)
+	plt.show()
+
+	plt.hist(flatness)
+	plt.show()
+
+	# TODO filter
+
+	return ret
+
+
+def get_similarity(job_list):
+	filtered_features = filter_features(get_features(job_list))
+	print filtered_features
+
+	# TODO generate similarity matrix
+
+
+
+
 nodes = "<nodes>" + get_gexf_node(0, "/test/file", 30, 0,0,0, 90, 90, 255) + get_gexf_node(1, "/toto/file", 30, -50,0,0, 200,90,90) + "</nodes>"
 edges = "<edges>" + get_gexf_edge(0, 0, 1, 1) + "</edges>"
 
@@ -83,6 +146,8 @@ minZ = -10
 maxZ = 10
 edgeCreationProbability = 0.0013
 edgeDefaultProximity = 1
+
+get_similarity(make_job_list(folderPath))
 
 # Generate all nodes
 node_list = []
