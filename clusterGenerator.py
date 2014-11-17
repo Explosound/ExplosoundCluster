@@ -121,24 +121,7 @@ def get_features(job_list, force_rescan):
 			flatness.append(float(audiofile_features[i][2]))
 
 		#serialisation avec pickle 
-		with open('/Users/neogaldr/cluster/rms.pkl', 'wb') as f:
-			pkl.dump(rms,f)
-		with open('/Users/neogaldr/cluster/centroid.pkl', 'wb') as f:
-			pkl.dump(centroid,f)
-		with open('/Users/neogaldr/cluster/flatness.pkl', 'wb') as f:
-			pkl.dump(flatness,f)
-		with open('/Users/neogaldr/cluster/features.pkl', 'wb') as f:
-			pkl.dump(audiofile_features,f)			
-
-	#ouvrir un serialized
-	with open('/Users/neogaldr/Developments/Explosound/Cluster/rms.pkl', 'rb') as f:
-		rms = pkl.load(f)
-	with open('/Users/neogaldr/Developments/Explosound/Cluster/centroid.pkl', 'rb') as f:
-		centroid = pkl.load(f)
-	with open('/Users/neogaldr/Developments/Explosound/Cluster/flatness.pkl', 'rb') as f:
-		flatness = pkl.load(f)
-	with open('/Users/neogaldr/Developments/Explosound/Cluster/features.pkl', 'rb') as f:
-		features = pkl.load(f)
+		
 
 	#centrer et reduire
 	rms = ppr.scale(rms)
@@ -185,11 +168,23 @@ def get_edges(features):
 			if(similarity[nodeId][id2] > 0):
 				potential_edges.append([nodeId, id2, similarity[nodeId][id2]])
 
+		
 		edges.append(max(potential_edges, key=lambda x:x[2])) #max by proximity score
 		# nullify scores so it doesn't get picked twice
 		similarity[edges[-1][0]][edges[-1][1]] = 0
 
-		
+		#create a list of all potential connections for this node
+		potential_edges = []
+		for id1 in range(0, nodeId):
+			if(similarity[id1][nodeId] > 0):
+				potential_edges.append([id1, nodeId, similarity[id1][nodeId]])
+		for id2 in range(nodeId + 1,len(features)):
+			if(similarity[nodeId][id2] > 0):
+				potential_edges.append([nodeId, id2, similarity[nodeId][id2]])
+
+		edges.append(max(potential_edges, key=lambda x:x[2])) #max by proximity score
+		# nullify scores so it doesn't get picked twice
+		similarity[edges[-1][0]][edges[-1][1]] = 0
 
 	return edges
 
@@ -210,7 +205,7 @@ minZ = -10
 maxZ = 10
 edgeCreationProbability = 0.0013
 edgeDefaultProximity = 1
-forceRescan = False
+forceRescan = True
 
 print "Hello =)"
 print "Generating job list for folder " + folderPath

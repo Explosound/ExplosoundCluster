@@ -1,7 +1,0 @@
-.project
-.pydevproject
-*.pyc
-*.pyo
-*.swp
-.DS_Store
-.settings

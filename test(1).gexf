@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz="http://www.gexf.net/1.2draft/viz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd">
+  <meta lastmodifieddate="2014-10-05">
+    <creator>Gephi 0.8.1</creator>
+    <description></description>
+  </meta>
+  <graph defaultedgetype="undirected" mode="static">
+    <attributes class="node" mode="static">
+      <attribute id="modularity_class" title="Modularity Class" type="integer"></attribute>
+    </attributes>
+    <nodes>
+      <node id="0" label="/User/Library">
+        <attvalues>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="28.685715"></viz:size>
+        <viz:position x="1781.0895" y="775.9963" z="-81.28681"></viz:position>
+        <viz:color r="91" g="91" b="245"></viz:color>
+      </node>
+      <node id="1" label="Napoleon">
+        <attvalues>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="4.0"></viz:size>
+        <viz:position x="1823.9402" y="889.73785" z="-85.3233"></viz:position>
+        <viz:color r="91" g="91" b="245"></viz:color>
+      </node>
+      <node id="2" label="MlleBaptistine">
+        <attvalues>
+          <attvalue for="modularity_class" value="1"></attvalue>
+        </attvalues>
+        <viz:size value="9.485714"></viz:size>
+        <viz:position x="1717.2786" y="738.8631" z="-95.622604"></viz:position>
+        <viz:color r="245" g="91" b="91"></viz:color>
+      </node>
+      <node id="3" label="MmeMagloire">
+        <attvalues>
+          <attvalue for="modularity_class" value="1"></attvalue>
+        </attvalues>
+        <viz:size value="9.485714"></viz:size>
+        <viz:position x="1743.37" y="736.5232" z="-121.89733"></viz:position>
+        <viz:color r="245" g="91" b="91"></viz:color>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="0" source="1" target="0">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="1" source="2" target="0" weight="8.0">
+        <attvalues></attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>
